@@ -1,5 +1,5 @@
 {
-  "name": "dumb-messages",
+  "name": "message-picker",
   "version": "1.0.0",
   "author": "Raul Santana <raulhsantana@gmail.com>",
   "main": "src/server.ts",
