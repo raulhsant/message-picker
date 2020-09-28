@@ -6,35 +6,34 @@ class MessagesController {
     messagesService = new MessagesService()
 
     randomMessage(request: Request, response: Response) {
-        const messages = this.messagesService.getMessages();
-        if (messages.fileExists) {
-            let index = Math.floor(Math.random() * (messages.messages.length));
-
-            let result = {
-                message: messages.messages[index],
-                index: index,
-            };
-            return response.json(result);
+        try {
+            const seed = Math.random();
+            const message = this.messagesService.getRandomMessage(seed);
+            return response.json(message);
+        } catch (error) {
+            if (error.code === 'ENOENT') { // file not found
+                console.log('File not found!')
+                response.status(500).send("Looks like the messages database went for a walk... &#x1F3C3&#x1F3C3&#x1F3C3");
+            } else
+                throw error;
         }
-        response.status(500).send("Looks like the messages database went for a walk... &#x1F3C3&#x1F3C3&#x1F3C3");
     }
 
     getMessage(request: Request, response: Response) {
-        const id = parseInt(request.params.id);
-
-        const messages = this.messagesService.getMessages();
-        if (messages.fileExists) {
-            let result = {
-                message: messages.messages[id],
-                index: id
-            }
-            if (result.message === undefined) {
+        const { id } = request.params;
+        try {
+            const message = this.messagesService.getMessage(parseInt(id));
+            return response.json(message);
+        } catch (error) {
+            if (error.code === 'ENOENT') { // file not found
+                console.log('File not found!')
+                response.status(500).send("Looks like the messages database went for a walk... &#x1F3C3&#x1F3C3&#x1F3C3");
+            } else if (error.code === 'ENOMES') { // message not found
+                console.log(error.message);
                 response.status(400).send("The requested message could not be found. &#x1F61E")
-                return;
-            }
-            return response.json(result);
+            } else
+                throw error;
         }
-        response.status(500).send("Looks like the messages database went for a walk... &#x1F3C3&#x1F3C3&#x1F3C3");
     }
 }
 
